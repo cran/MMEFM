@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting started with MMEFM</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting started with MMEFM</h1>
+
+
+
+<div id="model-and-estimation" class="section level2">
+<h2>Model and estimation</h2>
+<p>Grouped matrix-valued time series can contain dynamics shared across
+groups and variation specific to each group. Within each matrix, changes
+in the overall level or in individual rows and columns need not be
+interactions. The Multilevel Main Effects Matrix Factor Model (MMEFM)
+separates these additive effects from global and local common components
+while preserving the matrix structure.</p>
+<p>For group <span class="math inline">\(m\)</span> and time <span class="math inline">\(t\)</span>, the model is</p>
+<p><span class="math display">\[\begin{aligned}
+Y_t^{(m)} ={}&amp; (\mu_t +
+\mu_t^{(m)})\mathbf{1}_{p_m}\mathbf{1}_{q_m}&#39; \\
+&amp;+ (A_{1m}\alpha_t + A_{2m}\alpha_t^{(m)})\mathbf{1}_{q_m}&#39;
++ \mathbf{1}_{p_m}(B_{1m}\beta_t + B_{2m}\beta_t^{(m)})&#39; \\
+&amp;+ Q_m G_t J_m&#39; + R_m F_t^{(m)} C_m&#39; + E_t^{(m)}.
+\end{aligned}\]</span></p>
+<p>Here <span class="math inline">\(Y_t^{(m)}\)</span> is a <span class="math inline">\(p_m\times q_m\)</span> observation and <span class="math inline">\(\mathbf{1}_d\)</span> is the length-<span class="math inline">\(d\)</span> vector of ones. The grand means <span class="math inline">\(\mu_t\)</span> and <span class="math inline">\(\mu_t^{(m)}\)</span> are scalars. The vectors
+<span class="math inline">\(\alpha_t\)</span> and <span class="math inline">\(\beta_t\)</span> describe global row and column
+main-effect factors; their local counterparts depend on <span class="math inline">\(m\)</span>. The loading matrices translate these
+shared or local factors into each group’s coordinates. The global core
+<span class="math inline">\(G_t\)</span> has dimensions <span class="math inline">\(k_r\times k_c\)</span>, and the local core <span class="math inline">\(F_t^{(m)}\)</span> has dimensions <span class="math inline">\(k_r^{(m)}\times k_c^{(m)}\)</span>. Their bilinear
+products describe row-column interactions. The remaining term is
+error.</p>
+<p>In R, <code>Xt</code> is a list of numeric arrays with dimensions
+<code>T x p_m x q_m</code>: time, rows, then columns. Groups share the
+observation times but may have different spatial dimensions. The
+accompanying manuscript, <em>Multilevel Main Effects Matrix Factor
+Model</em> by Kaixin Liu, Clifford Lam, and Zetai Cen (2026), develops
+this model (<a href="https://doi.org/10.48550/arXiv.2610.18335">arXiv:2610.18335</a>).
+Under its theoretical conditions, main effects may be nonstationary and
+remain consistently estimable at individual time points.</p>
+<p>Identification conditions distinguish the model components.
+<strong>IC1</strong> centers all spatial loading columns, separating
+additive effects from common components. <strong>IC2</strong> separates
+global and local variation through uncorrelatedness, zero-sum local
+grand means, and temporal orthogonality of global and local main-effect
+scores. <strong>IC3</strong> requires full-rank loadings and factor
+second moments, with local loading directions remaining full rank after
+projection off global spaces. Factor coordinates still require
+normalization; equivalent signs or changes of basis should not be
+interpreted as different fitted signals.</p>
+<p>Estimation follows this separation. First, grand means and centered
+row and column means directly estimate the combined additive effects.
+Cross-group moments identify global main-effect loading spaces;
+projections then recover local structures. Shared main-effect score
+series are obtained by pooling temporal information, and their global
+loadings are refitted.</p>
+<p>Subtracting the direct additive estimates gives <span class="math inline">\(\check Y_t^{(m)}\)</span>. Iterative projection
+uses these residuals to estimate initial global common loading spaces,
+followed by local common loadings and factors. After removing local
+common components, group-specific representations of the global core are
+aligned to a common coordinate system and pooled. Global common loadings
+are then refitted. The default alignment and refitting use Van Loan’s
+nearest-Kronecker approximation.</p>
+</div>
+<div id="a-small-worked-example" class="section level2">
+<h2>A small worked example</h2>
+<p>We simulate three named groups with unequal matrix dimensions and one
+factor in each rank class. Known generating ranks let us illustrate
+estimation without making the example depend on successful rank
+selection in a small sample.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>rank <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">r1 =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">l1 =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">r2 =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">1</span><span class="dt">L</span>), <span class="at">l2 =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">1</span><span class="dt">L</span>),</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>             <span class="at">kr =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">kc =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">kr_m =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">1</span><span class="dt">L</span>), <span class="at">kc_m =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">1</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">1</span><span class="dt">L</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>simulation <span class="ot">&lt;-</span> <span class="fu">gen_MMEFM</span>(<span class="at">TT =</span> <span class="dv">40</span><span class="dt">L</span>, <span class="at">p =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">6</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">7</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">8</span><span class="dt">L</span>), <span class="at">q =</span> <span class="fu">c</span>(<span class="at">a =</span> <span class="dv">7</span><span class="dt">L</span>, <span class="at">b =</span> <span class="dv">8</span><span class="dt">L</span>, <span class="at">c =</span> <span class="dv">6</span><span class="dt">L</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>                        <span class="at">rank =</span> rank, <span class="at">burn =</span> <span class="dv">20</span><span class="dt">L</span>, <span class="at">filter_length =</span> <span class="dv">40</span><span class="dt">L</span>, <span class="at">seed =</span> <span class="dv">2026</span><span class="dt">L</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>Xt <span class="ot">&lt;-</span> simulation<span class="sc">$</span>Xt</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>rank <span class="ot">&lt;-</span> simulation<span class="sc">$</span>rank</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">lapply</span>(Xt, dim)</span></code></pre></div>
+<pre><code>## $a
+## [1] 40  6  7
+## 
+## $b
+## [1] 40  7  8
+## 
+## $c
+## [1] 40  8  6</code></pre>
+<p>The data use Gaussian innovations and zero fractional memory with
+short-memory dynamics. <code>simulation$rank</code> is known because the
+model was specified when generating the data. For other simulation
+designs, see <code>?gen_MMEFM</code>.</p>
+<p>We now estimate the global and local structures at these ranks. The
+summary reports the dimensions, ranks, alignment method, and refitting
+method. Convergence information is available in
+<code>fit$convergence</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">est_MMEFM</span>(Xt, <span class="at">rank =</span> rank, <span class="at">K0 =</span> <span class="dv">8</span><span class="dt">L</span>, <span class="at">max_iter =</span> <span class="dv">50</span><span class="dt">L</span>, <span class="at">tol =</span> <span class="dv">1</span>e<span class="sc">-</span><span class="dv">4</span>, <span class="at">seed =</span> <span class="dv">2026</span><span class="dt">L</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
+<pre><code>## MMEFM fit: 3 groups, T = 40
+## Global ranks: r1=1, l1=1, kr=1, kc=1 
+## Alignment: VanLoan; refit: VanLoan
+##   p q r2 l2 kr_m kc_m
+## a 6 7  1  1    1    1
+## b 7 8  1  1    1    1
+## c 8 6  1  1    1    1</code></pre>
+</div>
+<div id="fitted-components-and-residuals" class="section level2">
+<h2>Fitted components and residuals</h2>
+<p>The final fitted signal combines low-rank global and local main
+effects with global and local common components. Its main-effect terms
+use the estimated factor scores, refitted global loadings
+<code>A1_tilde</code> and <code>B1_tilde</code>, and local loadings
+<code>A2_hat</code> and <code>B2_hat</code>. The global common term
+similarly uses the final refitted loadings and corresponding core.
+<code>fitted()</code> reconstructs these products rather than
+substituting the direct row and column means.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>predicted <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>global_main <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit, <span class="at">component =</span> <span class="st">&quot;global_main&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>local_main <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit, <span class="at">component =</span> <span class="st">&quot;local_main&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>global_common <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit, <span class="at">component =</span> <span class="st">&quot;global_common&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>local_common <span class="ot">&lt;-</span> <span class="fu">fitted</span>(fit, <span class="at">component =</span> <span class="st">&quot;local_common&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">residuals</span>(fit)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">lapply</span>(predicted, dim)</span></code></pre></div>
+<pre><code>## $a
+## [1] 40  6  7
+## 
+## $b
+## [1] 40  7  8
+## 
+## $c
+## [1] 40  8  6</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">vapply</span>(errors, <span class="cf">function</span>(x) <span class="fu">sqrt</span>(<span class="fu">mean</span>(x<span class="sc">^</span><span class="dv">2</span>)), <span class="fu">numeric</span>(<span class="dv">1</span><span class="dt">L</span>))</span></code></pre></div>
+<pre><code>##         a         b         c 
+## 0.8980873 1.0821010 1.0352305</code></pre>
+<p>Each result preserves the group names and array dimensions. The
+default fitted value sums the four components.
+<code>residuals(fit)</code> is the observation minus this final signal;
+its RMS above is a descriptive summary.</p>
+<p>By contrast, <code>fit$main_effect$direct</code> contains the direct
+moment estimators <code>c_hat</code>, <code>a_hat</code>, and
+<code>b_hat</code>. Removing these additive terms gives
+<code>fit$check_Y</code>, the intermediate residual used to estimate
+common components. It is not the final model residual.</p>
+</div>
+<div id="choosing-ranks" class="section level2">
+<h2>Choosing ranks</h2>
+<p>The model has eight rank classes:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Loading structure</th>
+<th align="left">Global</th>
+<th align="left">Local in group <span class="math inline">\(m\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Row main effects</td>
+<td align="left"><code>r1</code> (<span class="math inline">\(r_1\)</span>)</td>
+<td align="left"><code>r2[m]</code> (<span class="math inline">\(r_2^{(m)}\)</span>)</td>
+</tr>
+<tr class="even">
+<td align="left">Column main effects</td>
+<td align="left"><code>l1</code> (<span class="math inline">\(\ell_1\)</span>)</td>
+<td align="left"><code>l2[m]</code> (<span class="math inline">\(\ell_2^{(m)}\)</span>)</td>
+</tr>
+<tr class="odd">
+<td align="left">Row common loadings</td>
+<td align="left"><code>kr</code> (<span class="math inline">\(k_r\)</span>)</td>
+<td align="left"><code>kr_m[m]</code> (<span class="math inline">\(k_r^{(m)}\)</span>)</td>
+</tr>
+<tr class="even">
+<td align="left">Column common loadings</td>
+<td align="left"><code>kc</code> (<span class="math inline">\(k_c\)</span>)</td>
+<td align="left"><code>kc_m[m]</code> (<span class="math inline">\(k_c^{(m)}\)</span>)</td>
+</tr>
+</tbody>
+</table>
+<p>The package currently requires positive ranks. IC1 and full-rank
+separation limit combined row ranks to the centered dimension: <span class="math inline">\(r_1+r_2^{(m)}\le p_m-1\)</span> and <span class="math inline">\(k_r+k_r^{(m)}\le p_m-1\)</span>. The analogous
+column bounds are <span class="math inline">\(\ell_1+\ell_2^{(m)}\le
+q_m-1\)</span> and <span class="math inline">\(k_c+k_c^{(m)}\le
+q_m-1\)</span>. Equality is allowed.</p>
+<p><code>select_MMEFM_rank()</code> chooses the index minimizing the
+unperturbed consecutive eigenvalue ratio <span class="math inline">\(\lambda_{j+1}/\lambda_j\)</span> of the relevant
+moment matrix. For global ranks, it first takes the maximum across
+groups separately at each eigenvalue index, then forms consecutive
+ratios. Local ranks use each group’s own spectrum. All available
+consecutive ratios are considered; global common ranks are updated
+within iterative projection.</p>
+<p>Automatic selection need not recover the generating ranks in a small
+noisy sample. The eight rank classes are selected independently, and the
+final combined bounds are checked afterward. Infeasible tuples cause an
+error rather than rank repair. The following optional commands are
+therefore not evaluated here:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>selected_rank <span class="ot">&lt;-</span> <span class="fu">select_MMEFM_rank</span>(Xt, <span class="at">K0 =</span> <span class="dv">8</span><span class="dt">L</span>, <span class="at">max_iter =</span> <span class="dv">50</span><span class="dt">L</span>, <span class="at">seed =</span> <span class="dv">2026</span><span class="dt">L</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>automatic_fit <span class="ot">&lt;-</span> <span class="fu">est_MMEFM</span>(Xt, <span class="at">rank =</span> <span class="cn">NULL</span>, <span class="at">K0 =</span> <span class="dv">8</span><span class="dt">L</span>, <span class="at">max_iter =</span> <span class="dv">50</span><span class="dt">L</span>, <span class="at">seed =</span> <span class="dv">2026</span><span class="dt">L</span>)</span></code></pre></div>
+<p>The first returns an <code>mmefm_rank</code> object that can be
+supplied to <code>est_MMEFM()</code>. The second selects ranks before
+fitting automatically.</p>
+</div>
+<div id="detecting-and-screening-global-common-factors" class="section level2">
+<h2>Detecting and screening global common factors</h2>
+<p>A fitted global common component does not by itself establish shared
+dynamics. <code>detect_MMEFM_global()</code> assesses whether a global
+common component exists and which groups share it. It standardizes the
+direct residuals and computes group statistics <span class="math inline">\(S_{G,m}\)</span> measuring cross-group dependence
+relative to within-group variation.</p>
+<p>The existence test uses the second-largest group statistic because a
+global common component must involve at least two groups. Circular-shift
+bootstrap samples preserve within-group dependence while disrupting
+synchronous cross-group alignment. Their second-largest statistics give
+one empirical cutoff for both existence detection and group screening.
+Existence requires the observed second-largest statistic to exceed the
+cutoff; screening retains groups exceeding that same cutoff only when
+the existence test rejects and at least two groups qualify.</p>
+<p><strong>The following B = 3 example is for illustration only and does
+not provide reliable bootstrap calibration.</strong> It is not required
+to select every truly active group.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>detection <span class="ot">&lt;-</span> <span class="fu">detect_MMEFM_global</span>(fit, <span class="at">B =</span> <span class="dv">3</span><span class="dt">L</span>, <span class="at">K0 =</span> <span class="dv">8</span><span class="dt">L</span>, <span class="at">max_iter =</span> <span class="dv">50</span><span class="dt">L</span>, <span class="at">tol =</span> <span class="dv">1</span>e<span class="sc">-</span><span class="dv">4</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                                 <span class="at">parallel =</span> <span class="cn">FALSE</span>, <span class="at">seed =</span> <span class="dv">2026</span><span class="dt">L</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>detection</span></code></pre></div>
+<pre><code>## MMEFM global detection: 3 groups
+## Second-largest S_G: 0.572426; cutoff: 0.0833909; alpha: 0.05
+## Global common factors detected: yes 
+## Selected groups: a, b</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>detection<span class="sc">$</span>statistic</span></code></pre></div>
+<pre><code>##          a          b          c 
+## 0.66428275 0.57242558 0.01484942</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>detection<span class="sc">$</span>selected</span></code></pre></div>
+<pre><code>##     a     b     c 
+##  TRUE  TRUE FALSE</code></pre>
+<p>Whole-sample circular shifts are intended for a stationary segment.
+They should not be applied across structural breaks merely because the
+model permits nonstationary main effects. See
+<code>?detect_MMEFM_global</code> for calibration controls and advanced
+options.</p>
+<p>Rank choices and convergence should be assessed before interpreting
+fitted components. Compare loading spaces or reconstructed effects
+rather than unidentified coordinates. Neither a small reconstruction
+error nor a successful numerical fit establishes the model assumptions,
+and a tiny bootstrap does not establish detection accuracy.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

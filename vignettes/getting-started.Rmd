@@ -1,0 +1,123 @@
+---
+title: "Getting started with MMEFM"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with MMEFM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(MMEFM)
+```
+
+## Model and estimation
+
+Grouped matrix-valued time series can contain dynamics shared across groups and variation specific to each group. Within each matrix, changes in the overall level or in individual rows and columns need not be interactions. The Multilevel Main Effects Matrix Factor Model (MMEFM) separates these additive effects from global and local common components while preserving the matrix structure.
+
+For group $m$ and time $t$, the model is
+
+\[
+\begin{aligned}
+Y_t^{(m)} ={}& (\mu_t + \mu_t^{(m)})\mathbf{1}_{p_m}\mathbf{1}_{q_m}' \\
+&+ (A_{1m}\alpha_t + A_{2m}\alpha_t^{(m)})\mathbf{1}_{q_m}'
+ + \mathbf{1}_{p_m}(B_{1m}\beta_t + B_{2m}\beta_t^{(m)})' \\
+&+ Q_m G_t J_m' + R_m F_t^{(m)} C_m' + E_t^{(m)}.
+\end{aligned}
+\]
+
+Here $Y_t^{(m)}$ is a $p_m\times q_m$ observation and $\mathbf{1}_d$ is the length-$d$ vector of ones. The grand means $\mu_t$ and $\mu_t^{(m)}$ are scalars. The vectors $\alpha_t$ and $\beta_t$ describe global row and column main-effect factors; their local counterparts depend on $m$. The loading matrices translate these shared or local factors into each group's coordinates. The global core $G_t$ has dimensions $k_r\times k_c$, and the local core $F_t^{(m)}$ has dimensions $k_r^{(m)}\times k_c^{(m)}$. Their bilinear products describe row-column interactions. The remaining term is error.
+
+In R, `Xt` is a list of numeric arrays with dimensions `T x p_m x q_m`: time, rows, then columns. Groups share the observation times but may have different spatial dimensions. The accompanying manuscript, *Multilevel Main Effects Matrix Factor Model* by Kaixin Liu, Clifford Lam, and Zetai Cen (2026), develops this model ([arXiv:2610.18335](https://doi.org/10.48550/arXiv.2610.18335)). Under its theoretical conditions, main effects may be nonstationary and remain consistently estimable at individual time points.
+
+Identification conditions distinguish the model components. **IC1** centers all spatial loading columns, separating additive effects from common components. **IC2** separates global and local variation through uncorrelatedness, zero-sum local grand means, and temporal orthogonality of global and local main-effect scores. **IC3** requires full-rank loadings and factor second moments, with local loading directions remaining full rank after projection off global spaces. Factor coordinates still require normalization; equivalent signs or changes of basis should not be interpreted as different fitted signals.
+
+Estimation follows this separation. First, grand means and centered row and column means directly estimate the combined additive effects. Cross-group moments identify global main-effect loading spaces; projections then recover local structures. Shared main-effect score series are obtained by pooling temporal information, and their global loadings are refitted.
+
+Subtracting the direct additive estimates gives $\check Y_t^{(m)}$. Iterative projection uses these residuals to estimate initial global common loading spaces, followed by local common loadings and factors. After removing local common components, group-specific representations of the global core are aligned to a common coordinate system and pooled. Global common loadings are then refitted. The default alignment and refitting use Van Loan's nearest-Kronecker approximation.
+
+## A small worked example
+
+We simulate three named groups with unequal matrix dimensions and one factor in each rank class. Known generating ranks let us illustrate estimation without making the example depend on successful rank selection in a small sample.
+
+```{r simulation}
+rank <- list(r1 = 1L, l1 = 1L, r2 = c(a = 1L, b = 1L, c = 1L), l2 = c(a = 1L, b = 1L, c = 1L),
+             kr = 1L, kc = 1L, kr_m = c(a = 1L, b = 1L, c = 1L), kc_m = c(a = 1L, b = 1L, c = 1L))
+simulation <- gen_MMEFM(TT = 40L, p = c(a = 6L, b = 7L, c = 8L), q = c(a = 7L, b = 8L, c = 6L),
+                        rank = rank, burn = 20L, filter_length = 40L, seed = 2026L)
+Xt <- simulation$Xt
+rank <- simulation$rank
+lapply(Xt, dim)
+```
+
+The data use Gaussian innovations and zero fractional memory with short-memory dynamics. `simulation$rank` is known because the model was specified when generating the data. For other simulation designs, see `?gen_MMEFM`.
+
+We now estimate the global and local structures at these ranks. The summary reports the dimensions, ranks, alignment method, and refitting method. Convergence information is available in `fit$convergence`.
+
+```{r estimation}
+fit <- est_MMEFM(Xt, rank = rank, K0 = 8L, max_iter = 50L, tol = 1e-4, seed = 2026L)
+summary(fit)
+```
+
+## Fitted components and residuals
+
+The final fitted signal combines low-rank global and local main effects with global and local common components. Its main-effect terms use the estimated factor scores, refitted global loadings `A1_tilde` and `B1_tilde`, and local loadings `A2_hat` and `B2_hat`. The global common term similarly uses the final refitted loadings and corresponding core. `fitted()` reconstructs these products rather than substituting the direct row and column means.
+
+```{r fitted-components}
+predicted <- fitted(fit)
+global_main <- fitted(fit, component = "global_main")
+local_main <- fitted(fit, component = "local_main")
+global_common <- fitted(fit, component = "global_common")
+local_common <- fitted(fit, component = "local_common")
+errors <- residuals(fit)
+lapply(predicted, dim)
+vapply(errors, function(x) sqrt(mean(x^2)), numeric(1L))
+```
+
+Each result preserves the group names and array dimensions. The default fitted value sums the four components. `residuals(fit)` is the observation minus this final signal; its RMS above is a descriptive summary.
+
+By contrast, `fit$main_effect$direct` contains the direct moment estimators `c_hat`, `a_hat`, and `b_hat`. Removing these additive terms gives `fit$check_Y`, the intermediate residual used to estimate common components. It is not the final model residual.
+
+## Choosing ranks
+
+The model has eight rank classes:
+
+| Loading structure | Global | Local in group $m$ |
+|:--|:--|:--|
+| Row main effects | `r1` ($r_1$) | `r2[m]` ($r_2^{(m)}$) |
+| Column main effects | `l1` ($\ell_1$) | `l2[m]` ($\ell_2^{(m)}$) |
+| Row common loadings | `kr` ($k_r$) | `kr_m[m]` ($k_r^{(m)}$) |
+| Column common loadings | `kc` ($k_c$) | `kc_m[m]` ($k_c^{(m)}$) |
+
+The package currently requires positive ranks. IC1 and full-rank separation limit combined row ranks to the centered dimension: $r_1+r_2^{(m)}\le p_m-1$ and $k_r+k_r^{(m)}\le p_m-1$. The analogous column bounds are $\ell_1+\ell_2^{(m)}\le q_m-1$ and $k_c+k_c^{(m)}\le q_m-1$. Equality is allowed.
+
+`select_MMEFM_rank()` chooses the index minimizing the unperturbed consecutive eigenvalue ratio $\lambda_{j+1}/\lambda_j$ of the relevant moment matrix. For global ranks, it first takes the maximum across groups separately at each eigenvalue index, then forms consecutive ratios. Local ranks use each group's own spectrum. All available consecutive ratios are considered; global common ranks are updated within iterative projection.
+
+Automatic selection need not recover the generating ranks in a small noisy sample. The eight rank classes are selected independently, and the final combined bounds are checked afterward. Infeasible tuples cause an error rather than rank repair. The following optional commands are therefore not evaluated here:
+
+```{r automatic-ranks, eval=FALSE}
+selected_rank <- select_MMEFM_rank(Xt, K0 = 8L, max_iter = 50L, seed = 2026L)
+automatic_fit <- est_MMEFM(Xt, rank = NULL, K0 = 8L, max_iter = 50L, seed = 2026L)
+```
+
+The first returns an `mmefm_rank` object that can be supplied to `est_MMEFM()`. The second selects ranks before fitting automatically.
+
+## Detecting and screening global common factors
+
+A fitted global common component does not by itself establish shared dynamics. `detect_MMEFM_global()` assesses whether a global common component exists and which groups share it. It standardizes the direct residuals and computes group statistics $S_{G,m}$ measuring cross-group dependence relative to within-group variation.
+
+The existence test uses the second-largest group statistic because a global common component must involve at least two groups. Circular-shift bootstrap samples preserve within-group dependence while disrupting synchronous cross-group alignment. Their second-largest statistics give one empirical cutoff for both existence detection and group screening. Existence requires the observed second-largest statistic to exceed the cutoff; screening retains groups exceeding that same cutoff only when the existence test rejects and at least two groups qualify.
+
+**The following B = 3 example is for illustration only and does not provide reliable bootstrap calibration.** It is not required to select every truly active group.
+
+```{r detection}
+detection <- detect_MMEFM_global(fit, B = 3L, K0 = 8L, max_iter = 50L, tol = 1e-4,
+                                 parallel = FALSE, seed = 2026L)
+detection
+detection$statistic
+detection$selected
+```
+
+Whole-sample circular shifts are intended for a stationary segment. They should not be applied across structural breaks merely because the model permits nonstationary main effects. See `?detect_MMEFM_global` for calibration controls and advanced options.
+
+Rank choices and convergence should be assessed before interpreting fitted components. Compare loading spaces or reconstructed effects rather than unidentified coordinates. Neither a small reconstruction error nor a successful numerical fit establishes the model assumptions, and a tiny bootstrap does not establish detection accuracy.
